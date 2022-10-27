@@ -1,17 +1,19 @@
-import os
-from os.path import exists
-import sys
-import discord
 import asyncio
+import os
+import sys
+from os.path import exists
+import discord
+import requests
 from dotenv import load_dotenv
 from core.logging import get_logger
 
-embed_color = discord.Colour.from_rgb(222, 89, 28)
-    
-load_dotenv()
+
+#start up initialization stuff
 self = discord.Bot()
 intents = discord.Intents.default()
 intents.members = True
+load_dotenv()
+embed_color = discord.Colour.from_rgb(222, 89, 28)
 self.logger = get_logger(__name__)
 
 file_exists = exists('resources/stats.txt')
@@ -22,9 +24,10 @@ if file_exists is False:
 self.load_extension('core.stablecog')
 self.load_extension('core.tipscog')
 
-@self.slash_command(name = "stats", description = "How many images has the bot generated?")
+#stats slash command
+@self.slash_command(name = 'stats', description = 'How many images has the bot generated?')
 async def stats(ctx):
-    with open("resources/stats.txt", 'r') as f: data = list(map(int, f.readlines()))
+    with open('resources/stats.txt', 'r') as f: data = list(map(int, f.readlines()))
     embed = discord.Embed(title='Art generated', description=f'I have created {data[0]} pictures!', color=embed_color)
     await ctx.respond(embed=embed)
 
@@ -33,11 +36,12 @@ async def on_ready():
     self.logger.info(f'Logged in as {self.user.name} ({self.user.id})')
     await self.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='drawing tutorials.'))
 
+#feature to delete generations. give bot 'Add Reactions' permission (or not, to hide the ❌)
 @self.event
 async def on_message(message):
     if message.author == self.user:
         try:
-            if message.embeds[0].fields[0].name == 'command':
+            if message.embeds[0].fields[0].name == 'My drawing of':
                 await message.add_reaction('❌')
         except:
             pass
